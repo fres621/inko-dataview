@@ -1,0 +1,94 @@
+# DataView
+#
+# @warning This is WIP -- so far only methods for int short and byte have been implemented.
+# This module provides methods like Java's DataOutput and DataInput to manipulate a ByteArray
+# This is useful to read many bytes at once when building and parsing packets
+# @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataOutput.html|DataOutput}
+# @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html|DataInput}
+
+trait pub IntoReader {
+  fn pub move into_reader -> Reader
+}
+
+# Similar to JavaScript's DataView
+# @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html|DataInput}
+class pub Reader {
+  let @bytes: ByteArray
+
+  fn pub getInt(from: Int) -> Int {
+    (
+      ((@bytes.get(from)     & 0xFF) << 24)  | 
+      ((@bytes.get(from + 1) & 0xFF) << 16)  |
+      ((@bytes.get(from + 2) & 0xFF) << 8)   |
+      (@bytes.get(from + 3) & 0xFF)
+    ) >> 0
+  }
+
+  fn pub getShort(from: Int) -> Int {
+    (@bytes.get(from) & 0xFF << 8) | (@bytes.get(from + 1) & 0xFF)
+  }
+
+  fn pub getByte(from: Int) -> Int {
+    @bytes.get(from)
+  }
+
+  fn pub size -> Int {
+    @bytes.size
+  }
+
+  fn pub static new(bytes: ByteArray) -> Reader {
+    Reader(bytes)
+  }
+}
+
+impl IntoReader for Reader {
+  fn pub move into_reader -> Reader {
+    self
+  }
+}
+
+# Wrapper around Reader that consumes bytes every time you read
+# @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html|DataInput}
+class pub Consumer {
+  let @reader: Reader
+  let @consumed: Int
+
+  # consume method is private
+  fn mut consume(bytes: Int) -> Int {
+    @consumed := @consumed + bytes
+  }
+
+  fn pub mut readInt -> Int {
+    @reader.getInt(consume(4))
+  }
+
+  fn pub mut readShort -> Int {
+    @reader.getShort(consume(2))
+  }
+
+  fn pub mut readByte -> Int {
+    @reader.getByte(consume(1))
+  }
+
+  fn pub size -> Int {
+    @reader.size - @consumed
+  }
+
+  fn pub static new(reader: Reader) -> Consumer {
+    Consumer(reader, 0)
+  }
+}
+
+# @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataOutput.html|DataOutput}
+class pub Writer {
+  let pub @bytes: mut ByteArray
+
+  fn pub mut writeShort(value: Int) {
+    @bytes.push((value >> 8) & 0xFF)
+    @bytes.push(value & 0xFF)
+  }
+
+  fn pub mut writeByte(value: Int) {
+    @bytes.push(value)
+  }
+}
