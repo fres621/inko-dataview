@@ -11,6 +11,8 @@ trait pub IntoReader {
   fn pub move into_reader -> Reader
 }
 
+# TODO Should an Uint64 class be implemented?
+
 # Similar to JavaScript's DataView
 # @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html|DataInput}
 class pub Reader {
@@ -30,6 +32,26 @@ class pub Reader {
 
   fn pub getUint16LE(from: Int) -> Int {
     getUint16(from, true)
+  }
+
+  # @warning Not safe to use: Values bigger than Inko's Int limit (Int64) will overflow to negative numbers
+  fn pub getUint64BE(from: Int) -> Int {
+    let mut value = 0
+    let mut i = 0
+    while i < 8 {
+      value = (value << 8) | @bytes.get(from + (i := i + 1))
+    }
+    value
+  }
+
+  # @warning Not safe to use: Values bigger than Inko's Int limit (Int64) will overflow to negative numbers
+  fn pub getUint64LE(from: Int) -> Int {
+    let mut value = 0
+    let mut i = 7
+    while i >= 0 {
+      value = (value << 8) | @bytes.get(from + (i := i - 1))
+    }
+    value
   }
 
   fn pub getInt(from: Int) -> Int {
@@ -87,6 +109,14 @@ class pub Consumer {
 
   fn pub mut readUint16LE -> Int {
     @reader.getUint16LE(consume(2))
+  }
+
+  fn pub mut readUint64BE -> Int {
+    @reader.getUint64BE(consume(8))
+  }
+
+  fn pub mut readUint64LE -> Int {
+    @reader.getUint64LE(consume(8))
   }
 
   fn pub mut readInt -> Int {
