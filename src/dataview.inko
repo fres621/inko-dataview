@@ -15,6 +15,22 @@ trait pub IntoReader {
 class pub Reader {
   let @bytes: ByteArray
 
+  fn getUint16(from: Int, littleEndian: Bool) -> Int {
+    if (littleEndian) {
+      (@bytes.get(from + 1) << 8) | @bytes.get(from)
+    } else {
+      (@bytes.get(from) << 8) | @bytes.get(from + 1)
+    }
+  }
+
+  fn pub getUint16BE(from: Int) -> Int {
+    getUint16(from, false)
+  }
+
+  fn pub getUint16LE(from: Int) -> Int {
+    getUint16(from, true)
+  }
+
   fn pub getInt(from: Int) -> Int {
     (
       ((@bytes.get(from)     & 0xFF) << 24)  | 
@@ -56,6 +72,14 @@ class pub Consumer {
   # consume method is private
   fn mut consume(bytes: Int) -> Int {
     @consumed := @consumed + bytes
+  }
+
+  fn pub mut readUint16BE -> Int {
+    @reader.getUint16BE(consume(2))
+  }
+
+  fn pub mut readUint16LE -> Int {
+    @reader.getUint16LE(consume(2))
   }
 
   fn pub mut readInt -> Int {
