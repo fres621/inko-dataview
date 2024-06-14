@@ -5,6 +5,7 @@
 # This is useful to read many bytes at once when building and parsing packets
 # @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataOutput.html|DataOutput}
 # @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html|DataInput}
+import std.byte_array(IntoByteArray)
 
 trait pub IntoReader {
   fn pub move into_reader -> Reader
@@ -13,7 +14,7 @@ trait pub IntoReader {
 # Similar to JavaScript's DataView
 # @see {@link https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html|DataInput}
 class pub Reader {
-  let @bytes: ByteArray
+  let pub @bytes: ByteArray
 
   fn getUint16(from: Int, littleEndian: Bool) -> Int {
     if (littleEndian) {
@@ -60,6 +61,12 @@ class pub Reader {
 impl IntoReader for Reader {
   fn pub move into_reader -> Reader {
     self
+  }
+}
+
+impl IntoByteArray for Reader {
+  fn pub move into_byte_array -> ByteArray {
+    @bytes
   }
 }
 
