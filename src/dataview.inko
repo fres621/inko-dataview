@@ -153,3 +153,9 @@ class pub Writer {
     @bytes.push(value)
   }
 }
+
+impl IntoByteArray for Writer {
+  fn pub move into_byte_array -> ByteArray {
+    @bytes.clone
+  }
+}
